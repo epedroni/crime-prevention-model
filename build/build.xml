@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<project name="socmod" default="shebang" basedir="..">
+
+	<property name="main.build.dir" value="build/main" />
+	<property name="main.src.dir" value="src" />
+	<property name="main-class" value="model.ModelCLI" />
+
+	<property name="build.dir" location="build" />
+	<property name="dist.dir" location="dist" />
+
+	<property name="jar.name" value="socmod" />
+
+	<path id="classpath.base" >
+		<fileset dir="${basedir}/">
+		</fileset>
+	</path>
+
+	<target name="compile" depends="clean">
+		<mkdir dir="${main.build.dir}"/>
+		<javac srcdir="${main.src.dir}" destdir="${main.build.dir}" includeantruntime="false">
+			<classpath refid="classpath.base"/>
+		</javac>
+	</target>
+
+	<!-- delete all class files -->
+	<!-- To run this: use "ant clean" -->
+	<target name="clean">
+		<delete dir="${main.build.dir}" />
+		<delete dir="${test.build.dir}" />
+		<echo message="clean done" />
+	</target>
+
+	<!-- Create the jar and declare the ext libraries in manifest.mf file -->
+	<target name="jar" depends="compile" >
+		<mkdir dir="${dist.dir}" />
+
+		<jar jarfile="${dist.dir}/${jar.name}.jar" basedir="${main.build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}" />
+				<attribute name="Class-Path" value="${classpath.base.name}" />
+			</manifest>
+		</jar>
+	</target>
+
+	<!-- Produce a standalone, runnable jar -->
+	<target name="deploy" depends="compile, jar" />
+
+	<!-- Concatenate the jar to a pre-set header and chmod 755 it -->
+	<target name="shebang" depends="deploy" >
+		<concat destfile="${dist.dir}/${jar.name}" binary="yes">
+			<fileset dir="${build.dir}" includes="header"/>
+			<fileset dir="${dist.dir}" includes="${jar.name}.jar"/>
+		</concat>
+
+		<chmod file="${dist.dir}/${jar.name}" perm="755"/>
+	</target>
+
+</project>
